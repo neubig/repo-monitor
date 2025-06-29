@@ -466,12 +466,20 @@ button:not(.btn):hover {
   text-decoration: underline;
 }
 
-.error {
+.error,
+.error-message {
   color: #ff4d4f;
   padding: 1em;
   border: 1px solid #ff4d4f;
   border-radius: 4px;
   background-color: #fff1f0;
+  margin-bottom: 1em;
+}
+
+.pull-request-data {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e5e5;
 }
 
 .monitor-container {

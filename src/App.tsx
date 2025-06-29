@@ -2,27 +2,71 @@ import { useState, useEffect } from 'react';
 import openHandsLogo from './assets/all-hands-logo.svg';
 import './App.css';
 import { GithubTokenManager } from './components/GithubTokenManager';
-import { hasGithubToken } from './utils/github';
+import { hasGithubToken, getGithubToken } from './utils/github';
+import PullRequestMonitor from './components/PullRequestMonitor';
+import type { Repository } from './services/PullRequestService';
 
 function App() {
   const [repoUrl, setRepoUrl] = useState('');
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [hasToken, setHasToken] = useState(false);
+  const [repository, setRepository] = useState<Repository | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if token exists on initial load
     setHasToken(hasGithubToken());
   }, []);
 
+  // Parse GitHub repository URL to extract owner and name
+  const parseRepoUrl = (url: string): Repository | null => {
+    try {
+      // Handle URLs like https://github.com/owner/repo or github.com/owner/repo
+      const githubRegex = /github\.com\/([^/]+)\/([^/]+)/;
+      const match = url.match(githubRegex);
+
+      if (match && match.length >= 3) {
+        return {
+          owner: match[1],
+          name: match[2].replace('.git', ''), // Remove .git if present
+        };
+      }
+
+      // Handle simple owner/repo format
+      const simpleRegex = /^([^/]+)\/([^/]+)$/;
+      const simpleMatch = url.match(simpleRegex);
+
+      if (simpleMatch && simpleMatch.length >= 3) {
+        return {
+          owner: simpleMatch[1],
+          name: simpleMatch[2].replace('.git', ''),
+        };
+      }
+
+      return null;
+    } catch (err) {
+      console.error('Error parsing repository URL:', err);
+      return null;
+    }
+  };
+
   const handleStartMonitoring = () => {
     if (repoUrl.trim()) {
-      setIsMonitoring(true);
-      // TODO: Implement actual monitoring logic
+      setError(null);
+      const repo = parseRepoUrl(repoUrl.trim());
+
+      if (repo) {
+        setRepository(repo);
+        setIsMonitoring(true);
+      } else {
+        setError('Invalid repository URL format. Please use format: https://github.com/owner/repo');
+      }
     }
   };
 
   const handleStopMonitoring = () => {
     setIsMonitoring(false);
+    setRepository(null);
   };
 
   const handleTokenChange = (hasToken: boolean) => {
@@ -90,14 +134,30 @@ function App() {
             )}
           </div>
 
-          {isMonitoring && (
+          {error && (
+            <div className="error-message">
+              <p>{error}</p>
+            </div>
+          )}
+
+          {isMonitoring && repository && (
             <div className="monitoring-status">
               <div className="status-card">
                 <h3>Monitoring Active</h3>
-                <p>Repository: {repoUrl}</p>
+                <p>
+                  Repository: {repository.owner}/{repository.name}
+                </p>
                 <div className="status-indicator">
                   <span className="status-dot"></span>
                   <span>Live monitoring in progress...</span>
+                </div>
+
+                {/* Display the actual pull request data */}
+                <div className="pull-request-data">
+                  <PullRequestMonitor
+                    repository={repository}
+                    githubToken={(hasToken && getGithubToken()) || undefined}
+                  />
                 </div>
               </div>
             </div>

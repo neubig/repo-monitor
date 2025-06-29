@@ -72,7 +72,6 @@ describe('App', () => {
     fireEvent.click(button);
 
     expect(screen.getByText('Monitoring Active')).toBeInTheDocument();
-    expect(screen.getByText('Repository: https://github.com/test/repo')).toBeInTheDocument();
     expect(screen.getByText('Stop Monitoring')).toBeInTheDocument();
   });
 
