@@ -1,11 +1,16 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import App from './App'
 
+// Mock the PullRequestMonitor component
+vi.mock('./components/PullRequestMonitor', () => ({
+  default: vi.fn(() => <div data-testid="mock-pr-monitor">Mock PR Monitor</div>)
+}))
+
 describe('App', () => {
-  it('renders Vite + React heading', () => {
+  it('renders GitHub Repository Monitor heading', () => {
     render(<App />)
-    expect(screen.getByText('Vite + React')).toBeInTheDocument()
+    expect(screen.getByText('GitHub Repository Monitor')).toBeInTheDocument()
   })
 
   it('renders count button with initial value', () => {
@@ -30,10 +35,30 @@ describe('App', () => {
     expect(screen.getByAltText('React logo')).toBeInTheDocument()
   })
 
-  it('renders edit instruction text', () => {
+  it('renders repository form fields', () => {
     render(<App />)
-    expect(screen.getByText((_, element) => {
-      return element?.textContent === 'Edit src/App.tsx and save to test HMR'
-    })).toBeInTheDocument()
+    expect(screen.getByLabelText('Repository Owner:')).toBeInTheDocument()
+    expect(screen.getByLabelText('Repository Name:')).toBeInTheDocument()
+    expect(screen.getByLabelText('GitHub Token (optional):')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Monitor Repository' })).toBeInTheDocument()
+  })
+
+  it('updates repository when form is submitted', () => {
+    render(<App />)
+    
+    // Get form elements
+    const ownerInput = screen.getByLabelText('Repository Owner:')
+    const nameInput = screen.getByLabelText('Repository Name:')
+    const submitButton = screen.getByRole('button', { name: 'Monitor Repository' })
+    
+    // Change input values
+    fireEvent.change(ownerInput, { target: { value: 'testuser' } })
+    fireEvent.change(nameInput, { target: { value: 'test-repo' } })
+    
+    // Submit the form
+    fireEvent.click(submitButton)
+    
+    // Verify the PullRequestMonitor component is rendered
+    expect(screen.getByTestId('mock-pr-monitor')).toBeInTheDocument()
   })
 })
