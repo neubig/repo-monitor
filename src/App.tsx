@@ -16,7 +16,7 @@ function App() {
 
   const handleTokenChange = (hasToken: boolean) => {
     setHasToken(hasToken);
-  }
+  };
 
   return (
     <>
@@ -29,14 +29,14 @@ function App() {
         </a>
       </div>
       <h1>GitHub Repo Monitor</h1>
-      
+
       <div className="card">
         <h2>GitHub Authentication</h2>
         <GithubTokenManager onTokenChange={handleTokenChange} />
         <p className="token-status-message">
-          {hasToken 
-            ? "✅ GitHub token is set. You can now access GitHub API." 
-            : "⚠️ No GitHub token set. Some features may be limited."}
+          {hasToken
+            ? '✅ GitHub token is set. You can now access GitHub API.'
+            : '⚠️ No GitHub token set. Some features may be limited.'}
         </p>
       </div>
 

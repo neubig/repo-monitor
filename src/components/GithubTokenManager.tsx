@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { saveGithubToken, clearGithubToken, hasGithubToken } from '../utils/github';
 
 interface GithubTokenManagerProps {
-  onTokenChange?: (hasToken: boolean) => void;
+  onTokenChange?: (_tokenExists: boolean) => void;
 }
 
 export function GithubTokenManager({ onTokenChange }: GithubTokenManagerProps) {
@@ -14,7 +14,7 @@ export function GithubTokenManager({ onTokenChange }: GithubTokenManagerProps) {
     // Check if token exists in local storage
     const tokenExists = hasGithubToken();
     setHasToken(tokenExists);
-    
+
     // Notify parent component if callback is provided
     if (onTokenChange) {
       onTokenChange(tokenExists);
@@ -26,7 +26,7 @@ export function GithubTokenManager({ onTokenChange }: GithubTokenManagerProps) {
       saveGithubToken(token.trim());
       setHasToken(true);
       setIsEditing(false);
-      
+
       // Notify parent component if callback is provided
       if (onTokenChange) {
         onTokenChange(true);
@@ -38,7 +38,7 @@ export function GithubTokenManager({ onTokenChange }: GithubTokenManagerProps) {
     clearGithubToken();
     setToken('');
     setHasToken(false);
-    
+
     // Notify parent component if callback is provided
     if (onTokenChange) {
       onTokenChange(false);
@@ -52,14 +52,12 @@ export function GithubTokenManager({ onTokenChange }: GithubTokenManagerProps) {
           <input
             type="password"
             value={token}
-            onChange={(e) => setToken(e.target.value)}
+            onChange={e => setToken(e.target.value)}
             placeholder="Enter GitHub token"
             aria-label="GitHub token"
           />
           <button onClick={handleSaveToken}>Save Token</button>
-          {isEditing && (
-            <button onClick={() => setIsEditing(false)}>Cancel</button>
-          )}
+          {isEditing && <button onClick={() => setIsEditing(false)}>Cancel</button>}
         </div>
       ) : (
         <div className="token-status">

@@ -38,18 +38,18 @@ export const hasGithubToken = (): boolean => {
 export const fetchGithubApi = async <T>(url: string): Promise<T> => {
   const token = getGithubToken();
   const headers: HeadersInit = {
-    'Accept': 'application/vnd.github.v3+json',
+    Accept: 'application/vnd.github.v3+json',
   };
-  
+
   if (token) {
     headers['Authorization'] = `token ${token}`;
   }
-  
+
   const response = await fetch(url, { headers });
-  
+
   if (!response.ok) {
     throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
   }
-  
+
   return response.json();
 };

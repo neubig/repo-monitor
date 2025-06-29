@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getGithubToken, saveGithubToken, clearGithubToken, hasGithubToken, fetchGithubApi } from './github';
+import {
+  getGithubToken,
+  saveGithubToken,
+  clearGithubToken,
+  hasGithubToken,
+  fetchGithubApi,
+} from './github';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -25,10 +31,10 @@ describe('GitHub Utilities', () => {
   beforeEach(() => {
     // Setup localStorage mock
     Object.defineProperty(window, 'localStorage', { value: localStorageMock });
-    
+
     // Setup fetch mock
     Object.defineProperty(window, 'fetch', { value: fetchMock });
-    
+
     // Clear mocks before each test
     vi.clearAllMocks();
     localStorageMock.clear();
@@ -41,9 +47,9 @@ describe('GitHub Utilities', () => {
   describe('Token Management', () => {
     it('should save and retrieve a token', () => {
       const testToken = 'test-github-token';
-      
+
       saveGithubToken(testToken);
-      
+
       expect(localStorageMock.setItem).toHaveBeenCalledWith('github_token', testToken);
       expect(getGithubToken()).toBe(testToken);
       expect(localStorageMock.getItem).toHaveBeenCalledWith('github_token');
@@ -52,10 +58,10 @@ describe('GitHub Utilities', () => {
     it('should clear a token', () => {
       // First save a token
       saveGithubToken('test-token');
-      
+
       // Then clear it
       clearGithubToken();
-      
+
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('github_token');
       expect(getGithubToken()).toBeNull();
     });
@@ -63,10 +69,10 @@ describe('GitHub Utilities', () => {
     it('should check if a token exists', () => {
       // Initially no token
       expect(hasGithubToken()).toBe(false);
-      
+
       // Save a token
       saveGithubToken('test-token');
-      
+
       // Now should have a token
       expect(hasGithubToken()).toBe(true);
     });
@@ -79,17 +85,17 @@ describe('GitHub Utilities', () => {
         ok: true,
         json: vi.fn().mockResolvedValue(mockResponse),
       };
-      
+
       fetchMock.mockResolvedValue(mockFetchResponse);
-      
+
       const result = await fetchGithubApi<typeof mockResponse>('https://api.github.com/test');
-      
+
       expect(fetchMock).toHaveBeenCalledWith('https://api.github.com/test', {
         headers: {
-          'Accept': 'application/vnd.github.v3+json',
+          Accept: 'application/vnd.github.v3+json',
         },
       });
-      
+
       expect(result).toEqual(mockResponse);
     });
 
@@ -100,21 +106,21 @@ describe('GitHub Utilities', () => {
         ok: true,
         json: vi.fn().mockResolvedValue(mockResponse),
       };
-      
+
       // Save a token
       saveGithubToken(testToken);
-      
+
       fetchMock.mockResolvedValue(mockFetchResponse);
-      
+
       const result = await fetchGithubApi<typeof mockResponse>('https://api.github.com/test');
-      
+
       expect(fetchMock).toHaveBeenCalledWith('https://api.github.com/test', {
         headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'Authorization': `token ${testToken}`,
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `token ${testToken}`,
         },
       });
-      
+
       expect(result).toEqual(mockResponse);
     });
 
@@ -124,9 +130,9 @@ describe('GitHub Utilities', () => {
         status: 401,
         statusText: 'Unauthorized',
       };
-      
+
       fetchMock.mockResolvedValue(mockFetchResponse);
-      
+
       await expect(fetchGithubApi<unknown>('https://api.github.com/test')).rejects.toThrow(
         'GitHub API error: 401 Unauthorized'
       );

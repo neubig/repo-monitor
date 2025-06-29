@@ -60,12 +60,16 @@ describe('App', () => {
   it('shows token not set message when no token exists', () => {
     vi.mocked(githubUtils.hasGithubToken).mockReturnValue(false);
     render(<App />);
-    expect(screen.getByText('⚠️ No GitHub token set. Some features may be limited.')).toBeInTheDocument();
+    expect(
+      screen.getByText('⚠️ No GitHub token set. Some features may be limited.')
+    ).toBeInTheDocument();
   });
 
   it('shows token set message when token exists', () => {
     vi.mocked(githubUtils.hasGithubToken).mockReturnValue(true);
     render(<App />);
-    expect(screen.getByText('✅ GitHub token is set. You can now access GitHub API.')).toBeInTheDocument();
+    expect(
+      screen.getByText('✅ GitHub token is set. You can now access GitHub API.')
+    ).toBeInTheDocument();
   });
 });
