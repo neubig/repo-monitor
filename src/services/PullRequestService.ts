@@ -26,6 +26,8 @@ interface GitHubPullRequest {
   draft: boolean;
   requested_reviewers: unknown[];
   reviews?: unknown[];
+  review_comments: number;
+  reviews_count: number;
 }
 
 export class PullRequestService {
