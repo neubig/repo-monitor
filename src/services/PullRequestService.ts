@@ -18,16 +18,21 @@ export interface Repository {
   name: string;
 }
 
-interface GitHubPullRequest {
+// GitHub API response types
+interface GitHubReviewer {
+  login: string;
+  id: number;
+  type: string;
+}
+
+interface GitHubPR {
   id: number;
   number: number;
   title: string;
   html_url: string;
   draft: boolean;
-  requested_reviewers: unknown[];
-  reviews?: unknown[];
+  requested_reviewers: GitHubReviewer[];
   review_comments: number;
-  reviews_count: number;
 }
 
 export class PullRequestService {
@@ -57,17 +62,40 @@ export class PullRequestService {
       }
 
       const data = await response.json();
+      const pullRequests: PullRequest[] = [];
 
-      // Transform the data into our PullRequest interface
-      return data.map((pr: GitHubPullRequest) => ({
-        id: pr.id,
-        number: pr.number,
-        title: pr.title,
-        url: pr.html_url,
-        isDraft: pr.draft,
-        hasReviewers: pr.requested_reviewers?.length > 0,
-        hasBeenReviewed: pr.review_comments > 0 || pr.reviews_count > 0,
-      }));
+      // Process each pull request
+      for (const pr of data as GitHubPR[]) {
+        // For each PR, check if it has reviews
+        let hasBeenReviewed = pr.review_comments > 0;
+
+        // If we have a token, we can fetch review data for each PR
+        if (token) {
+          try {
+            const reviewsUrl = `${this.baseUrl}/repos/${repo.owner}/${repo.name}/pulls/${pr.number}/reviews`;
+            const reviewsResponse = await fetch(reviewsUrl, { headers });
+
+            if (reviewsResponse.ok) {
+              const reviewsData = await reviewsResponse.json();
+              hasBeenReviewed = hasBeenReviewed || reviewsData.length > 0;
+            }
+          } catch (reviewError) {
+            console.error(`Error fetching reviews for PR #${pr.number}:`, reviewError);
+          }
+        }
+
+        pullRequests.push({
+          id: pr.id,
+          number: pr.number,
+          title: pr.title,
+          url: pr.html_url,
+          isDraft: pr.draft,
+          hasReviewers: pr.requested_reviewers?.length > 0,
+          hasBeenReviewed,
+        });
+      }
+
+      return pullRequests;
     } catch (error) {
       console.error('Error fetching pull requests:', error);
       throw error;

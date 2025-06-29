@@ -21,61 +21,18 @@ describe('App', () => {
     vi.clearAllMocks();
   });
 
-  it('renders GitHub Repository Monitor heading', () => {
+  it('renders the OpenHands Repo Monitor heading', () => {
     render(<App />);
-    expect(screen.getByText('GitHub Repository Monitor')).toBeInTheDocument();
+    expect(screen.getByText('Repo Monitor')).toBeInTheDocument();
+    expect(screen.getByText('Monitor Your Repository')).toBeInTheDocument();
   });
 
-  it('renders count button with initial value', () => {
+  it('renders the OpenHands logo', () => {
     render(<App />);
-    expect(screen.getByText('count is 0')).toBeInTheDocument();
+    expect(screen.getByAltText('OpenHands logo')).toBeInTheDocument();
   });
 
-  it('increments count when button is clicked', () => {
-    render(<App />);
-    const button = screen.getByRole('button', { name: /count is/i });
-
-    fireEvent.click(button);
-    expect(screen.getByText('count is 1')).toBeInTheDocument();
-
-    fireEvent.click(button);
-    expect(screen.getByText('count is 2')).toBeInTheDocument();
-  });
-
-  it('renders Vite and React logos', () => {
-    render(<App />);
-    expect(screen.getByAltText('Vite logo')).toBeInTheDocument();
-    expect(screen.getByAltText('React logo')).toBeInTheDocument();
-  });
-
-  it('renders repository form fields', () => {
-    render(<App />);
-    expect(screen.getByLabelText('Repository Owner:')).toBeInTheDocument();
-    expect(screen.getByLabelText('Repository Name:')).toBeInTheDocument();
-    expect(screen.getByLabelText('GitHub Token (optional):')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Monitor Repository' })).toBeInTheDocument();
-  });
-
-  it('updates repository when form is submitted', () => {
-    render(<App />);
-
-    // Get form elements
-    const ownerInput = screen.getByLabelText('Repository Owner:');
-    const nameInput = screen.getByLabelText('Repository Name:');
-    const submitButton = screen.getByRole('button', { name: 'Monitor Repository' });
-
-    // Change input values
-    fireEvent.change(ownerInput, { target: { value: 'testuser' } });
-    fireEvent.change(nameInput, { target: { value: 'test-repo' } });
-
-    // Submit the form
-    fireEvent.click(submitButton);
-
-    // Verify the PullRequestMonitor component is rendered
-    expect(screen.getByTestId('mock-pr-monitor')).toBeInTheDocument();
-  });
-
-  it('renders GitHub token manager component', () => {
+  it('renders GitHub Authentication section', () => {
     render(<App />);
     expect(screen.getByText('GitHub Authentication')).toBeInTheDocument();
   });
@@ -94,5 +51,73 @@ describe('App', () => {
     expect(
       screen.getByText('✅ GitHub token is set. You can now access GitHub API.')
     ).toBeInTheDocument();
+  });
+
+  it('renders the repository input field', () => {
+    render(<App />);
+    expect(screen.getByPlaceholderText(/Enter repository URL/i)).toBeInTheDocument();
+  });
+
+  it('renders the Start Monitoring button initially', () => {
+    render(<App />);
+    expect(screen.getByText('Start Monitoring')).toBeInTheDocument();
+  });
+
+  it('shows monitoring status when Start Monitoring is clicked with a URL', () => {
+    render(<App />);
+    const input = screen.getByPlaceholderText(/Enter repository URL/i);
+    const button = screen.getByText('Start Monitoring');
+
+    fireEvent.change(input, { target: { value: 'https://github.com/test/repo' } });
+    fireEvent.click(button);
+
+    expect(screen.getByText('Monitoring Active')).toBeInTheDocument();
+    expect(screen.getByText('Stop Monitoring')).toBeInTheDocument();
+  });
+
+  it('does not start monitoring when URL is empty', () => {
+    render(<App />);
+    const button = screen.getByText('Start Monitoring');
+
+    fireEvent.click(button);
+
+    expect(screen.queryByText('Monitoring Active')).not.toBeInTheDocument();
+    expect(screen.getByText('Start Monitoring')).toBeInTheDocument();
+  });
+
+  it('stops monitoring when Stop Monitoring is clicked', () => {
+    render(<App />);
+    const input = screen.getByPlaceholderText(/Enter repository URL/i);
+    const startButton = screen.getByText('Start Monitoring');
+
+    // Start monitoring
+    fireEvent.change(input, { target: { value: 'https://github.com/test/repo' } });
+    fireEvent.click(startButton);
+
+    // Stop monitoring
+    const stopButton = screen.getByText('Stop Monitoring');
+    fireEvent.click(stopButton);
+
+    expect(screen.queryByText('Monitoring Active')).not.toBeInTheDocument();
+    expect(screen.getByText('Start Monitoring')).toBeInTheDocument();
+  });
+
+  it('renders feature cards', () => {
+    render(<App />);
+    expect(screen.getByText('Real-time Updates')).toBeInTheDocument();
+    expect(screen.getByText('AI-Powered Insights')).toBeInTheDocument();
+    expect(screen.getByText('Easy Integration')).toBeInTheDocument();
+  });
+
+  it('renders navigation links', () => {
+    render(<App />);
+    expect(screen.getByText('GitHub')).toBeInTheDocument();
+    expect(screen.getByText('Docs')).toBeInTheDocument();
+  });
+
+  it('renders footer with OpenHands link', () => {
+    render(<App />);
+    const footer = screen.getByRole('contentinfo');
+    expect(footer).toHaveTextContent('Powered by OpenHands');
   });
 });
