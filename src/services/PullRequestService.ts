@@ -20,7 +20,7 @@ export interface Repository {
 
 export class PullRequestService {
   private baseUrl = 'https://api.github.com';
-  
+
   /**
    * Fetches pull requests from a GitHub repository
    * @param repo Repository information (owner and name)
@@ -30,22 +30,22 @@ export class PullRequestService {
   async fetchPullRequests(repo: Repository, token?: string): Promise<PullRequest[]> {
     const url = `${this.baseUrl}/repos/${repo.owner}/${repo.name}/pulls?state=open`;
     const headers: HeadersInit = {
-      'Accept': 'application/vnd.github.v3+json',
+      Accept: 'application/vnd.github.v3+json',
     };
-    
+
     if (token) {
       headers['Authorization'] = `token ${token}`;
     }
-    
+
     try {
       const response = await fetch(url, { headers });
-      
+
       if (!response.ok) {
         throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
+
       // Transform the data into our PullRequest interface
       return data.map((pr: any) => ({
         id: pr.id,
@@ -54,14 +54,14 @@ export class PullRequestService {
         url: pr.html_url,
         isDraft: pr.draft,
         hasReviewers: pr.requested_reviewers?.length > 0,
-        hasBeenReviewed: pr.review_comments > 0 || pr.reviews_count > 0
+        hasBeenReviewed: pr.review_comments > 0 || pr.reviews_count > 0,
       }));
     } catch (error) {
       console.error('Error fetching pull requests:', error);
       throw error;
     }
   }
-  
+
   /**
    * Gets pull requests that are open, not in draft status, but have no assigned reviewers
    * @param repo Repository information
@@ -72,7 +72,7 @@ export class PullRequestService {
     const pullRequests = await this.fetchPullRequests(repo, token);
     return pullRequests.filter(pr => !pr.isDraft && !pr.hasReviewers);
   }
-  
+
   /**
    * Gets pull requests that have been reviewed but are not in draft status
    * @param repo Repository information
