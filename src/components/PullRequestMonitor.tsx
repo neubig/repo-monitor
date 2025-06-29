@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import PullRequestService, { PullRequest, Repository } from '../services/PullRequestService';
+import PullRequestService from '../services/PullRequestService';
+import type { PullRequest, Repository } from '../services/PullRequestService';
 
 interface PullRequestMonitorProps {
   repository: Repository;

@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PullRequestService, Repository, PullRequest } from './PullRequestService';
+import { PullRequestService } from './PullRequestService';
+import type { Repository } from './PullRequestService';
 
-// Mock the global fetch function
-global.fetch = vi.fn();
+// Mock the fetch function
+vi.stubGlobal('fetch', vi.fn());
 
 describe('PullRequestService', () => {
   let service: PullRequestService;
@@ -42,7 +43,7 @@ describe('PullRequestService', () => {
     ];
     
     // Setup mock fetch response
-    (global.fetch as any).mockResolvedValueOnce({
+    (fetch as any).mockResolvedValueOnce({
       ok: true,
       json: async () => mockPullRequests
     });
@@ -50,7 +51,7 @@ describe('PullRequestService', () => {
     const result = await service.fetchPullRequests(mockRepo);
     
     // Verify fetch was called with correct URL
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(fetch).toHaveBeenCalledWith(
       'https://api.github.com/repos/testowner/testrepo/pulls?state=open',
       { headers: { 'Accept': 'application/vnd.github.v3+json' } }
     );
@@ -80,7 +81,7 @@ describe('PullRequestService', () => {
   
   it('should handle API errors gracefully', async () => {
     // Setup mock fetch to return an error
-    (global.fetch as any).mockResolvedValueOnce({
+    (fetch as any).mockResolvedValueOnce({
       ok: false,
       status: 404,
       statusText: 'Not Found'
@@ -126,7 +127,7 @@ describe('PullRequestService', () => {
     ];
     
     // Setup mock fetch response
-    (global.fetch as any).mockResolvedValueOnce({
+    (fetch as any).mockResolvedValueOnce({
       ok: true,
       json: async () => mockPullRequests
     });
@@ -175,7 +176,7 @@ describe('PullRequestService', () => {
     ];
     
     // Setup mock fetch response
-    (global.fetch as any).mockResolvedValueOnce({
+    (fetch as any).mockResolvedValueOnce({
       ok: true,
       json: async () => mockPullRequests
     });
@@ -190,7 +191,7 @@ describe('PullRequestService', () => {
   
   it('should use authentication token when provided', async () => {
     // Setup mock fetch response
-    (global.fetch as any).mockResolvedValueOnce({
+    (fetch as any).mockResolvedValueOnce({
       ok: true,
       json: async () => []
     });
@@ -199,7 +200,7 @@ describe('PullRequestService', () => {
     await service.fetchPullRequests(mockRepo, token);
     
     // Verify fetch was called with the authorization header
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(fetch).toHaveBeenCalledWith(
       'https://api.github.com/repos/testowner/testrepo/pulls?state=open',
       { 
         headers: { 
