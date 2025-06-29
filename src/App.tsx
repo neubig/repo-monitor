@@ -1,21 +1,21 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { GithubTokenManager } from './components/GithubTokenManager'
-import { hasGithubToken } from './utils/github'
+import { useState, useEffect } from 'react';
+import reactLogo from './assets/react.svg';
+import viteLogo from '/vite.svg';
+import './App.css';
+import { GithubTokenManager } from './components/GithubTokenManager';
+import { hasGithubToken } from './utils/github';
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [hasToken, setHasToken] = useState(false)
+  const [count, setCount] = useState(0);
+  const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
     // Check if token exists on initial load
-    setHasToken(hasGithubToken())
-  }, [])
+    setHasToken(hasGithubToken());
+  }, []);
 
   const handleTokenChange = (hasToken: boolean) => {
-    setHasToken(hasToken)
+    setHasToken(hasToken);
   }
 
   return (
@@ -41,18 +41,14 @@ function App() {
       </div>
 
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+        <button onClick={() => setCount(count => count + 1)}>count is {count}</button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
