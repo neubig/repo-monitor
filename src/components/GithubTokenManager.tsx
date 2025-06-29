@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getGithubToken, saveGithubToken, clearGithubToken, hasGithubToken } from '../utils/github';
+import { saveGithubToken, clearGithubToken, hasGithubToken } from '../utils/github';
 
 interface GithubTokenManagerProps {
   onTokenChange?: (hasToken: boolean) => void;

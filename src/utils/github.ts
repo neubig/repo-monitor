@@ -35,7 +35,7 @@ export const hasGithubToken = (): boolean => {
 /**
  * Fetch data from GitHub API with authentication
  */
-export const fetchGithubApi = async (url: string): Promise<any> => {
+export const fetchGithubApi = async <T>(url: string): Promise<T> => {
   const token = getGithubToken();
   const headers: HeadersInit = {
     'Accept': 'application/vnd.github.v3+json',

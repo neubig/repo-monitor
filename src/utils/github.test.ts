@@ -19,12 +19,15 @@ const localStorageMock = (() => {
 })();
 
 // Mock fetch
-global.fetch = vi.fn();
+const fetchMock = vi.fn();
 
 describe('GitHub Utilities', () => {
   beforeEach(() => {
     // Setup localStorage mock
     Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+    
+    // Setup fetch mock
+    Object.defineProperty(window, 'fetch', { value: fetchMock });
     
     // Clear mocks before each test
     vi.clearAllMocks();
@@ -77,11 +80,11 @@ describe('GitHub Utilities', () => {
         json: vi.fn().mockResolvedValue(mockResponse),
       };
       
-      (global.fetch as any).mockResolvedValue(mockFetchResponse);
+      fetchMock.mockResolvedValue(mockFetchResponse);
       
-      const result = await fetchGithubApi('https://api.github.com/test');
+      const result = await fetchGithubApi<typeof mockResponse>('https://api.github.com/test');
       
-      expect(global.fetch).toHaveBeenCalledWith('https://api.github.com/test', {
+      expect(fetchMock).toHaveBeenCalledWith('https://api.github.com/test', {
         headers: {
           'Accept': 'application/vnd.github.v3+json',
         },
@@ -101,11 +104,11 @@ describe('GitHub Utilities', () => {
       // Save a token
       saveGithubToken(testToken);
       
-      (global.fetch as any).mockResolvedValue(mockFetchResponse);
+      fetchMock.mockResolvedValue(mockFetchResponse);
       
-      const result = await fetchGithubApi('https://api.github.com/test');
+      const result = await fetchGithubApi<typeof mockResponse>('https://api.github.com/test');
       
-      expect(global.fetch).toHaveBeenCalledWith('https://api.github.com/test', {
+      expect(fetchMock).toHaveBeenCalledWith('https://api.github.com/test', {
         headers: {
           'Accept': 'application/vnd.github.v3+json',
           'Authorization': `token ${testToken}`,
@@ -122,9 +125,9 @@ describe('GitHub Utilities', () => {
         statusText: 'Unauthorized',
       };
       
-      (global.fetch as any).mockResolvedValue(mockFetchResponse);
+      fetchMock.mockResolvedValue(mockFetchResponse);
       
-      await expect(fetchGithubApi('https://api.github.com/test')).rejects.toThrow(
+      await expect(fetchGithubApi<unknown>('https://api.github.com/test')).rejects.toThrow(
         'GitHub API error: 401 Unauthorized'
       );
     });
