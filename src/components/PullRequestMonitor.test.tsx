@@ -17,7 +17,10 @@ vi.mock('../services/PullRequestService', () => {
 
 describe('PullRequestMonitor', () => {
   const mockRepository = { owner: 'testowner', name: 'testrepo' };
-  let mockService: any;
+  let mockService: {
+    getPullRequestsWithNoReviewers: ReturnType<typeof vi.fn>;
+    getReviewedNonDraftPullRequests: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     // Reset mocks before each test
@@ -29,7 +32,9 @@ describe('PullRequestMonitor', () => {
       getReviewedNonDraftPullRequests: vi.fn(),
     };
 
-    (PullRequestService as any).mockImplementation(() => mockService);
+    (PullRequestService as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => mockService
+    );
   });
 
   it('should display loading state initially', () => {

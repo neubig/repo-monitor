@@ -3,7 +3,8 @@ import { PullRequestService } from './PullRequestService';
 import type { Repository } from './PullRequestService';
 
 // Mock the fetch function
-vi.stubGlobal('fetch', vi.fn());
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
 
 describe('PullRequestService', () => {
   let service: PullRequestService;
@@ -43,7 +44,7 @@ describe('PullRequestService', () => {
     ];
 
     // Setup mock fetch response
-    (fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockPullRequests,
     });
@@ -81,7 +82,7 @@ describe('PullRequestService', () => {
 
   it('should handle API errors gracefully', async () => {
     // Setup mock fetch to return an error
-    (fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 404,
       statusText: 'Not Found',
@@ -129,7 +130,7 @@ describe('PullRequestService', () => {
     ];
 
     // Setup mock fetch response
-    (fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockPullRequests,
     });
@@ -178,7 +179,7 @@ describe('PullRequestService', () => {
     ];
 
     // Setup mock fetch response
-    (fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockPullRequests,
     });
@@ -193,7 +194,7 @@ describe('PullRequestService', () => {
 
   it('should use authentication token when provided', async () => {
     // Setup mock fetch response
-    (fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => [],
     });

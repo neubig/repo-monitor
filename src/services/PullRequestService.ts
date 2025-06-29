@@ -18,6 +18,16 @@ export interface Repository {
   name: string;
 }
 
+interface GitHubPullRequest {
+  id: number;
+  number: number;
+  title: string;
+  html_url: string;
+  draft: boolean;
+  requested_reviewers: unknown[];
+  reviews?: unknown[];
+}
+
 export class PullRequestService {
   private baseUrl = 'https://api.github.com';
 
@@ -47,7 +57,7 @@ export class PullRequestService {
       const data = await response.json();
 
       // Transform the data into our PullRequest interface
-      return data.map((pr: any) => ({
+      return data.map((pr: GitHubPullRequest) => ({
         id: pr.id,
         number: pr.number,
         title: pr.title,

@@ -13,13 +13,13 @@ export function PullRequestMonitor({ repository, githubToken }: PullRequestMonit
   const [pullRequestsWithNoReviewers, setPullRequestsWithNoReviewers] = useState<PullRequest[]>([]);
   const [reviewedPullRequests, setReviewedPullRequests] = useState<PullRequest[]>([]);
 
-  const service = new PullRequestService();
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
+
+        const service = new PullRequestService();
 
         // Fetch both types of pull requests
         const [noReviewers, reviewed] = await Promise.all([
