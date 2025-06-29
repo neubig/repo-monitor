@@ -1,10 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import openHandsLogo from './assets/all-hands-logo.svg'
 import './App.css'
+import { GithubTokenManager } from './components/GithubTokenManager'
+import { hasGithubToken } from './utils/github'
 
 function App() {
   const [repoUrl, setRepoUrl] = useState('')
   const [isMonitoring, setIsMonitoring] = useState(false)
+  const [hasToken, setHasToken] = useState(false)
+
+  useEffect(() => {
+    // Check if token exists on initial load
+    setHasToken(hasGithubToken())
+  }, [])
 
   const handleStartMonitoring = () => {
     if (repoUrl.trim()) {
@@ -15,6 +23,10 @@ function App() {
 
   const handleStopMonitoring = () => {
     setIsMonitoring(false)
+  }
+
+  const handleTokenChange = (hasToken: boolean) => {
+    setHasToken(hasToken)
   }
 
   return (
@@ -40,6 +52,18 @@ function App() {
         <div className="hero-section">
           <h2>Monitor Your Repository</h2>
           <p>Keep track of your repository activity with OpenHands-powered monitoring</p>
+        </div>
+
+        <div className="github-auth-section">
+          <div className="auth-card">
+            <h3>GitHub Authentication</h3>
+            <GithubTokenManager onTokenChange={handleTokenChange} />
+            <p className="token-status-message">
+              {hasToken
+                ? '✅ GitHub token is set. You can now access GitHub API.'
+                : '⚠️ No GitHub token set. Some features may be limited.'}
+            </p>
+          </div>
         </div>
 
         <div className="monitor-section">
@@ -102,4 +126,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

@@ -1,8 +1,21 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
-import App from './App'
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import App from './App';
+import * as githubUtils from './utils/github';
+
+// Mock the GitHub utilities
+vi.mock('./utils/github', () => ({
+  hasGithubToken: vi.fn(),
+  getGithubToken: vi.fn(),
+  saveGithubToken: vi.fn(),
+  clearGithubToken: vi.fn(),
+}));
 
 describe('App', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders the OpenHands Repo Monitor heading', () => {
     render(<App />)
     expect(screen.getByText('Repo Monitor')).toBeInTheDocument()
@@ -13,6 +26,27 @@ describe('App', () => {
     render(<App />)
     expect(screen.getByAltText('OpenHands logo')).toBeInTheDocument()
   })
+
+  it('renders GitHub Authentication section', () => {
+    render(<App />);
+    expect(screen.getByText('GitHub Authentication')).toBeInTheDocument();
+  });
+
+  it('shows token not set message when no token exists', () => {
+    vi.mocked(githubUtils.hasGithubToken).mockReturnValue(false);
+    render(<App />);
+    expect(
+      screen.getByText('⚠️ No GitHub token set. Some features may be limited.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows token set message when token exists', () => {
+    vi.mocked(githubUtils.hasGithubToken).mockReturnValue(true);
+    render(<App />);
+    expect(
+      screen.getByText('✅ GitHub token is set. You can now access GitHub API.')
+    ).toBeInTheDocument();
+  });
 
   it('renders the repository input field', () => {
     render(<App />)

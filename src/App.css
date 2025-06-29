@@ -298,3 +298,74 @@
     gap: 1rem;
   }
 }
+
+/* GitHub Authentication Section */
+.github-auth-section {
+  padding: 2rem 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.auth-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.auth-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #1a1a1a;
+}
+
+/* GitHub Token Manager Styles */
+.github-token-manager {
+  margin: 1.5rem 0;
+}
+
+.token-input {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.token-input input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  min-width: 250px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.token-input input:focus {
+  outline: none;
+  border-color: #1a1a1a;
+}
+
+.token-status {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.token-status span {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.token-status-message {
+  margin-top: 1rem;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #1a1a1a;
+}
