@@ -1,21 +1,12 @@
 import { useState, useEffect } from 'react';
 import openHandsLogo from './assets/all-hands-logo.svg';
 import './App.css';
-import PullRequestMonitor from './components/PullRequestMonitor';
-import type { Repository } from './services/PullRequestService';
 import { GithubTokenManager } from './components/GithubTokenManager';
 import { hasGithubToken } from './utils/github';
 
 function App() {
   const [repoUrl, setRepoUrl] = useState('');
   const [isMonitoring, setIsMonitoring] = useState(false);
-  const [repository, setRepository] = useState<Repository>({
-    owner: 'neubig',
-    name: 'repo-monitor',
-  });
-  const [owner, setOwner] = useState('neubig');
-  const [name, setName] = useState('repo-monitor');
-  const [token, setToken] = useState('');
   const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
@@ -36,11 +27,6 @@ function App() {
 
   const handleTokenChange = (hasToken: boolean) => {
     setHasToken(hasToken);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setRepository({ owner, name });
   };
 
   return (
@@ -72,7 +58,6 @@ function App() {
           <p>Keep track of your repository activity with OpenHands-powered monitoring</p>
         </div>
 
-<<<<<<< HEAD
         <div className="github-auth-section">
           <div className="auth-card">
             <h3>GitHub Authentication</h3>

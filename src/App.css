@@ -188,7 +188,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -222,7 +223,9 @@
   padding: 2rem;
   text-align: left;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .feature-card:hover {
@@ -336,7 +339,6 @@
 
 .read-the-docs {
   color: #888;
-}
 }
 
 /* Form styles */
