@@ -1,11 +1,24 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import App from './App'
+import * as githubUtils from './utils/github'
+
+// Mock the GitHub utilities
+vi.mock('./utils/github', () => ({
+  hasGithubToken: vi.fn(),
+  getGithubToken: vi.fn(),
+  saveGithubToken: vi.fn(),
+  clearGithubToken: vi.fn(),
+}))
 
 describe('App', () => {
-  it('renders Vite + React heading', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('renders GitHub Repo Monitor heading', () => {
     render(<App />)
-    expect(screen.getByText('Vite + React')).toBeInTheDocument()
+    expect(screen.getByText('GitHub Repo Monitor')).toBeInTheDocument()
   })
 
   it('renders count button with initial value', () => {
@@ -35,5 +48,22 @@ describe('App', () => {
     expect(screen.getByText((_, element) => {
       return element?.textContent === 'Edit src/App.tsx and save to test HMR'
     })).toBeInTheDocument()
+  })
+
+  it('renders GitHub token manager component', () => {
+    render(<App />)
+    expect(screen.getByText('GitHub Authentication')).toBeInTheDocument()
+  })
+
+  it('shows token not set message when no token exists', () => {
+    vi.mocked(githubUtils.hasGithubToken).mockReturnValue(false)
+    render(<App />)
+    expect(screen.getByText('⚠️ No GitHub token set. Some features may be limited.')).toBeInTheDocument()
+  })
+
+  it('shows token set message when token exists', () => {
+    vi.mocked(githubUtils.hasGithubToken).mockReturnValue(true)
+    render(<App />)
+    expect(screen.getByText('✅ GitHub token is set. You can now access GitHub API.')).toBeInTheDocument()
   })
 })
