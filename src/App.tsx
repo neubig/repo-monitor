@@ -1,33 +1,33 @@
-import { useState, useEffect } from 'react'
-import openHandsLogo from './assets/all-hands-logo.svg'
-import './App.css'
-import { GithubTokenManager } from './components/GithubTokenManager'
-import { hasGithubToken } from './utils/github'
+import { useState, useEffect } from 'react';
+import openHandsLogo from './assets/all-hands-logo.svg';
+import './App.css';
+import { GithubTokenManager } from './components/GithubTokenManager';
+import { hasGithubToken } from './utils/github';
 
 function App() {
-  const [repoUrl, setRepoUrl] = useState('')
-  const [isMonitoring, setIsMonitoring] = useState(false)
-  const [hasToken, setHasToken] = useState(false)
+  const [repoUrl, setRepoUrl] = useState('');
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
     // Check if token exists on initial load
-    setHasToken(hasGithubToken())
-  }, [])
+    setHasToken(hasGithubToken());
+  }, []);
 
   const handleStartMonitoring = () => {
     if (repoUrl.trim()) {
-      setIsMonitoring(true)
+      setIsMonitoring(true);
       // TODO: Implement actual monitoring logic
     }
-  }
+  };
 
   const handleStopMonitoring = () => {
-    setIsMonitoring(false)
-  }
+    setIsMonitoring(false);
+  };
 
   const handleTokenChange = (hasToken: boolean) => {
-    setHasToken(hasToken)
-  }
+    setHasToken(hasToken);
+  };
 
   return (
     <div className="app">
@@ -38,7 +38,11 @@ function App() {
             <h1>Repo Monitor</h1>
           </div>
           <nav className="nav">
-            <a href="https://github.com/All-Hands-AI/OpenHands" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com/All-Hands-AI/OpenHands"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               GitHub
             </a>
             <a href="https://docs.all-hands.dev/" target="_blank" rel="noopener noreferrer">
@@ -72,7 +76,7 @@ function App() {
               type="text"
               placeholder="Enter repository URL (e.g., https://github.com/user/repo)"
               value={repoUrl}
-              onChange={(e) => setRepoUrl(e.target.value)}
+              onChange={e => setRepoUrl(e.target.value)}
               className="repo-input"
             />
             {!isMonitoring ? (
@@ -120,10 +124,15 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>Powered by <a href="https://all-hands.dev" target="_blank" rel="noopener noreferrer">OpenHands</a></p>
+        <p>
+          Powered by{' '}
+          <a href="https://all-hands.dev" target="_blank" rel="noopener noreferrer">
+            OpenHands
+          </a>
+        </p>
       </footer>
     </div>
-  )
+  );
 }
 
 export default App;
