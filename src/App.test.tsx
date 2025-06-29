@@ -11,6 +11,11 @@ vi.mock('./utils/github', () => ({
   clearGithubToken: vi.fn(),
 }));
 
+// Mock the PullRequestMonitor component
+vi.mock('./components/PullRequestMonitor', () => ({
+  default: vi.fn(() => <div data-testid="mock-pr-monitor">Mock PR Monitor</div>),
+}));
+
 describe('App', () => {
   beforeEach(() => {
     vi.clearAllMocks();

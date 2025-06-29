@@ -321,6 +321,45 @@
   color: #1a1a1a;
 }
 
+/* Legacy styles from main branch - kept for compatibility */
+.card {
+  padding: 2em;
+  margin-bottom: 2em;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.counter-card {
+  margin-top: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+}
+
+/* Form styles */
+.form-group {
+  margin-bottom: 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.form-group label {
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 /* GitHub Token Manager Styles */
 .github-token-manager {
   margin: 1.5rem 0;
@@ -368,4 +407,74 @@
   border-radius: 8px;
   background: #f3f4f6;
   color: #1a1a1a;
+}
+
+/* Legacy button styles from main branch - kept for compatibility with existing components */
+button:not(.btn) {
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.25s;
+}
+
+button:not(.btn):hover {
+  background-color: #535bf2;
+}
+
+/* Pull Request Monitor styles */
+.pull-request-monitor {
+  text-align: left;
+  padding: 1em;
+}
+
+.monitor-section {
+  margin-bottom: 2em;
+}
+
+.monitor-section h3 {
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+}
+
+.pr-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.pr-item {
+  padding: 0.8em;
+  margin-bottom: 0.5em;
+  border: 1px solid #eaeaea;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.pr-item a {
+  color: #646cff;
+  text-decoration: none;
+}
+
+.pr-item a:hover {
+  text-decoration: underline;
+}
+
+.error {
+  color: #ff4d4f;
+  padding: 1em;
+  border: 1px solid #ff4d4f;
+  border-radius: 4px;
+  background-color: #fff1f0;
+}
+
+.monitor-container {
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 1em;
+  background-color: white;
 }
