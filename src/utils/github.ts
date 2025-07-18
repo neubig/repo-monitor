@@ -2,7 +2,10 @@
  * GitHub API utilities
  */
 
+import type { Repository } from '../services/PullRequestService';
+
 const GITHUB_TOKEN_KEY = 'github_token';
+const LAST_REPO_KEY = 'last_repository';
 
 /**
  * Get the GitHub token from local storage
@@ -52,4 +55,49 @@ export const fetchGithubApi = async <T>(url: string): Promise<T> => {
   }
 
   return response.json();
+};
+
+/**
+ * Get the last accessed repository from local storage
+ */
+export const getLastRepository = (): Repository | null => {
+  const repoData = localStorage.getItem(LAST_REPO_KEY);
+  if (!repoData) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(repoData) as Repository;
+  } catch (error) {
+    console.error('Error parsing stored repository data:', error);
+    return null;
+  }
+};
+
+/**
+ * Save the last accessed repository to local storage
+ */
+export const saveLastRepository = (repository: Repository): void => {
+  localStorage.setItem(LAST_REPO_KEY, JSON.stringify(repository));
+};
+
+/**
+ * Clear the last accessed repository from local storage
+ */
+export const clearLastRepository = (): void => {
+  localStorage.removeItem(LAST_REPO_KEY);
+};
+
+/**
+ * Check if a last accessed repository is stored
+ */
+export const hasLastRepository = (): boolean => {
+  return !!getLastRepository();
+};
+
+/**
+ * Convert a repository object to a GitHub URL string
+ */
+export const repositoryToUrl = (repository: Repository): string => {
+  return `https://github.com/${repository.owner}/${repository.name}`;
 };

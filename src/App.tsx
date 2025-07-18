@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import openHandsLogo from './assets/all-hands-logo.svg';
 import './App.css';
 import { GithubTokenManager } from './components/GithubTokenManager';
-import { hasGithubToken, getGithubToken } from './utils/github';
+import {
+  hasGithubToken,
+  getGithubToken,
+  getLastRepository,
+  saveLastRepository,
+  repositoryToUrl,
+} from './utils/github';
 import PullRequestMonitor from './components/PullRequestMonitor';
 import type { Repository } from './services/PullRequestService';
 
@@ -16,6 +22,13 @@ function App() {
   useEffect(() => {
     // Check if token exists on initial load
     setHasToken(hasGithubToken());
+
+    // Load the last accessed repository if it exists
+    const lastRepo = getLastRepository();
+    if (lastRepo) {
+      const repoUrl = repositoryToUrl(lastRepo);
+      setRepoUrl(repoUrl);
+    }
   }, []);
 
   // Parse GitHub repository URL to extract owner and name
@@ -58,6 +71,8 @@ function App() {
       if (repo) {
         setRepository(repo);
         setIsMonitoring(true);
+        // Save the repository as the most recently accessed
+        saveLastRepository(repo);
       } else {
         setError('Invalid repository URL format. Please use format: https://github.com/owner/repo');
       }

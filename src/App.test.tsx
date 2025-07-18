@@ -9,6 +9,11 @@ vi.mock('./utils/github', () => ({
   getGithubToken: vi.fn(),
   saveGithubToken: vi.fn(),
   clearGithubToken: vi.fn(),
+  getLastRepository: vi.fn(),
+  saveLastRepository: vi.fn(),
+  clearLastRepository: vi.fn(),
+  hasLastRepository: vi.fn(),
+  repositoryToUrl: vi.fn(),
 }));
 
 // Mock the PullRequestMonitor component
@@ -119,5 +124,88 @@ describe('App', () => {
     render(<App />);
     const footer = screen.getByRole('contentinfo');
     expect(footer).toHaveTextContent('Powered by OpenHands');
+  });
+
+  describe('Repository Storage', () => {
+    it('loads last repository on initial render', () => {
+      const mockRepository = { owner: 'testowner', name: 'testrepo' };
+      const mockUrl = 'https://github.com/testowner/testrepo';
+
+      vi.mocked(githubUtils.getLastRepository).mockReturnValue(mockRepository);
+      vi.mocked(githubUtils.repositoryToUrl).mockReturnValue(mockUrl);
+      vi.mocked(githubUtils.hasGithubToken).mockReturnValue(false);
+
+      render(<App />);
+
+      expect(githubUtils.getLastRepository).toHaveBeenCalled();
+      expect(githubUtils.repositoryToUrl).toHaveBeenCalledWith(mockRepository);
+
+      const input = screen.getByPlaceholderText(/Enter repository URL/i) as HTMLInputElement;
+      expect(input.value).toBe(mockUrl);
+    });
+
+    it('does not populate input when no last repository exists', () => {
+      vi.mocked(githubUtils.getLastRepository).mockReturnValue(null);
+      vi.mocked(githubUtils.hasGithubToken).mockReturnValue(false);
+
+      render(<App />);
+
+      expect(githubUtils.getLastRepository).toHaveBeenCalled();
+
+      const input = screen.getByPlaceholderText(/Enter repository URL/i) as HTMLInputElement;
+      expect(input.value).toBe('');
+    });
+
+    it('saves repository when monitoring starts', () => {
+      vi.mocked(githubUtils.getLastRepository).mockReturnValue(null);
+      vi.mocked(githubUtils.hasGithubToken).mockReturnValue(false);
+
+      render(<App />);
+
+      const input = screen.getByPlaceholderText(/Enter repository URL/i);
+      const button = screen.getByText('Start Monitoring');
+
+      fireEvent.change(input, { target: { value: 'https://github.com/test/repo' } });
+      fireEvent.click(button);
+
+      expect(githubUtils.saveLastRepository).toHaveBeenCalledWith({
+        owner: 'test',
+        name: 'repo',
+      });
+    });
+
+    it('saves repository with simple owner/repo format', () => {
+      vi.mocked(githubUtils.getLastRepository).mockReturnValue(null);
+      vi.mocked(githubUtils.hasGithubToken).mockReturnValue(false);
+
+      render(<App />);
+
+      const input = screen.getByPlaceholderText(/Enter repository URL/i);
+      const button = screen.getByText('Start Monitoring');
+
+      fireEvent.change(input, { target: { value: 'test/repo' } });
+      fireEvent.click(button);
+
+      expect(githubUtils.saveLastRepository).toHaveBeenCalledWith({
+        owner: 'test',
+        name: 'repo',
+      });
+    });
+
+    it('does not save repository when URL is invalid', () => {
+      vi.mocked(githubUtils.getLastRepository).mockReturnValue(null);
+      vi.mocked(githubUtils.hasGithubToken).mockReturnValue(false);
+
+      render(<App />);
+
+      const input = screen.getByPlaceholderText(/Enter repository URL/i);
+      const button = screen.getByText('Start Monitoring');
+
+      fireEvent.change(input, { target: { value: 'invalid-url' } });
+      fireEvent.click(button);
+
+      expect(githubUtils.saveLastRepository).not.toHaveBeenCalled();
+      expect(screen.getByText(/Invalid repository URL format/)).toBeInTheDocument();
+    });
   });
 });
