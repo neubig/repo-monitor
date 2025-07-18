@@ -5,7 +5,13 @@ import {
   clearGithubToken,
   hasGithubToken,
   fetchGithubApi,
+  getLastRepository,
+  saveLastRepository,
+  clearLastRepository,
+  hasLastRepository,
+  repositoryToUrl,
 } from './github';
+import type { Repository } from '../services/PullRequestService';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -136,6 +142,70 @@ describe('GitHub Utilities', () => {
       await expect(fetchGithubApi<unknown>('https://api.github.com/test')).rejects.toThrow(
         'GitHub API error: 401 Unauthorized'
       );
+    });
+  });
+
+  describe('Repository Management', () => {
+    const testRepository: Repository = {
+      owner: 'testowner',
+      name: 'testrepo',
+    };
+
+    it('should save and retrieve a repository', () => {
+      saveLastRepository(testRepository);
+
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'last_repository',
+        JSON.stringify(testRepository)
+      );
+      expect(getLastRepository()).toEqual(testRepository);
+      expect(localStorageMock.getItem).toHaveBeenCalledWith('last_repository');
+    });
+
+    it('should clear a repository', () => {
+      // First save a repository
+      saveLastRepository(testRepository);
+
+      // Then clear it
+      clearLastRepository();
+
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith('last_repository');
+      expect(getLastRepository()).toBeNull();
+    });
+
+    it('should check if a repository exists', () => {
+      // Initially no repository
+      expect(hasLastRepository()).toBe(false);
+
+      // Save a repository
+      saveLastRepository(testRepository);
+
+      // Now should have a repository
+      expect(hasLastRepository()).toBe(true);
+    });
+
+    it('should handle invalid JSON when retrieving repository', () => {
+      // Mock localStorage to return invalid JSON
+      localStorageMock.getItem.mockReturnValue('invalid-json');
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      expect(getLastRepository()).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error parsing stored repository data:',
+        expect.any(SyntaxError)
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should convert repository to URL', () => {
+      const expectedUrl = 'https://github.com/testowner/testrepo';
+      expect(repositoryToUrl(testRepository)).toBe(expectedUrl);
+    });
+
+    it('should return null when no repository is stored', () => {
+      expect(getLastRepository()).toBeNull();
     });
   });
 });
