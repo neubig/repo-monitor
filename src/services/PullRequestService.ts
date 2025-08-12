@@ -103,14 +103,14 @@ export class PullRequestService {
   }
 
   /**
-   * Gets pull requests that are open, not in draft status, but have no assigned reviewers
+   * Gets pull requests that are open, not in draft status, have no assigned reviewers, and have not been reviewed
    * @param repo Repository information
    * @param token Optional GitHub token
    * @returns Promise with filtered pull requests
    */
   async getPullRequestsWithNoReviewers(repo: Repository, token?: string): Promise<PullRequest[]> {
     const pullRequests = await this.fetchPullRequests(repo, token);
-    return pullRequests.filter(pr => !pr.isDraft && !pr.hasReviewers);
+    return pullRequests.filter(pr => !pr.isDraft && !pr.hasReviewers && !pr.hasBeenReviewed);
   }
 
   /**
