@@ -112,11 +112,6 @@ function App() {
       </header>
 
       <main className="main">
-        <div className="hero-section">
-          <h2>Monitor Your Repository</h2>
-          <p>Keep track of your repository activity with OpenHands-powered monitoring</p>
-        </div>
-
         <div className="github-auth-section">
           <div className="auth-card">
             <h3>GitHub Authentication</h3>
