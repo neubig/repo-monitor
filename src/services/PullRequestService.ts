@@ -110,7 +110,8 @@ export class PullRequestService {
    */
   async getPullRequestsWithNoReviewers(repo: Repository, token?: string): Promise<PullRequest[]> {
     const pullRequests = await this.fetchPullRequests(repo, token);
-    return pullRequests.filter(pr => !pr.isDraft && !pr.hasReviewers);
+    // Exclude PRs that have already been reviewed
+    return pullRequests.filter(pr => !pr.isDraft && !pr.hasReviewers && !pr.hasBeenReviewed);
   }
 
   /**
