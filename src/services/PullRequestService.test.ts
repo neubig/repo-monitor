@@ -143,6 +143,55 @@ describe('PullRequestService', () => {
     expect(result[0].title).toBe('PR with no reviewers');
   });
 
+  it('should exclude reviewed PRs from no reviewers list', async () => {
+    // Mock response data
+    const mockPullRequests = [
+      {
+        id: 1,
+        number: 101,
+        title: 'Reviewed PR with no current reviewers',
+        html_url: 'https://github.com/testowner/testrepo/pull/101',
+        draft: false,
+        requested_reviewers: [], // No current reviewers
+        review_comments: 5, // But has been reviewed
+        reviews_count: 1,
+      },
+      {
+        id: 2,
+        number: 102,
+        title: 'Non-reviewed PR with no reviewers',
+        html_url: 'https://github.com/testowner/testrepo/pull/102',
+        draft: false,
+        requested_reviewers: [],
+        review_comments: 0, // Not reviewed
+        reviews_count: 0,
+      },
+      {
+        id: 3,
+        number: 103,
+        title: 'Non-reviewed PR with reviewers',
+        html_url: 'https://github.com/testowner/testrepo/pull/103',
+        draft: false,
+        requested_reviewers: [{ login: 'reviewer1' }],
+        review_comments: 0,
+        reviews_count: 0,
+      },
+    ];
+
+    // Setup mock fetch response
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockPullRequests,
+    });
+
+    const result = await service.getPullRequestsWithNoReviewers(mockRepo);
+
+    // Verify only the non-reviewed, non-draft PR with no reviewers is returned
+    expect(result.length).toBe(1);
+    expect(result[0].number).toBe(102);
+    expect(result[0].title).toBe('Non-reviewed PR with no reviewers');
+  });
+
   it('should filter reviewed non-draft pull requests', async () => {
     // Mock response data
     const mockPullRequests = [
