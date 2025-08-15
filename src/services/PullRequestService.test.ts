@@ -29,7 +29,8 @@ describe('PullRequestService', () => {
         draft: false,
         requested_reviewers: [],
         review_comments: 0,
-        reviews_count: 0,
+        labels: [],
+        head: { sha: 'abc123' },
       },
       {
         id: 2,
@@ -39,7 +40,8 @@ describe('PullRequestService', () => {
         draft: true,
         requested_reviewers: [{ login: 'reviewer1' }],
         review_comments: 0,
-        reviews_count: 0,
+        labels: [],
+        head: { sha: 'def456' },
       },
     ];
 
@@ -67,6 +69,9 @@ describe('PullRequestService', () => {
         isDraft: false,
         hasReviewers: false,
         hasBeenReviewed: false,
+        isApproved: false,
+        labels: [],
+        ciStatus: 'unknown',
       },
       {
         id: 2,
@@ -76,6 +81,9 @@ describe('PullRequestService', () => {
         isDraft: true,
         hasReviewers: true,
         hasBeenReviewed: false,
+        isApproved: false,
+        labels: [],
+        ciStatus: 'unknown',
       },
     ]);
   });
@@ -105,7 +113,8 @@ describe('PullRequestService', () => {
         draft: false,
         requested_reviewers: [],
         review_comments: 0,
-        reviews_count: 0,
+        labels: [],
+        head: { sha: 'abc123' },
       },
       {
         id: 2,
@@ -115,7 +124,8 @@ describe('PullRequestService', () => {
         draft: false,
         requested_reviewers: [{ login: 'reviewer1' }],
         review_comments: 0,
-        reviews_count: 0,
+        labels: [],
+        head: { sha: 'def456' },
       },
       {
         id: 3,
@@ -125,7 +135,8 @@ describe('PullRequestService', () => {
         draft: true,
         requested_reviewers: [],
         review_comments: 0,
-        reviews_count: 0,
+        labels: [],
+        head: { sha: 'ghi789' },
       },
     ];
 
@@ -154,7 +165,8 @@ describe('PullRequestService', () => {
         draft: false,
         requested_reviewers: [], // No current reviewers
         review_comments: 5, // But has been reviewed
-        reviews_count: 1,
+        labels: [],
+        head: { sha: 'abc123' },
       },
       {
         id: 2,
@@ -164,7 +176,8 @@ describe('PullRequestService', () => {
         draft: false,
         requested_reviewers: [],
         review_comments: 0, // Not reviewed
-        reviews_count: 0,
+        labels: [],
+        head: { sha: 'def456' },
       },
       {
         id: 3,
@@ -174,7 +187,8 @@ describe('PullRequestService', () => {
         draft: false,
         requested_reviewers: [{ login: 'reviewer1' }],
         review_comments: 0,
-        reviews_count: 0,
+        labels: [],
+        head: { sha: 'ghi789' },
       },
     ];
 
@@ -203,7 +217,8 @@ describe('PullRequestService', () => {
         draft: false,
         requested_reviewers: [],
         review_comments: 5,
-        reviews_count: 1,
+        labels: [],
+        head: { sha: 'abc123' },
       },
       {
         id: 2,
@@ -213,7 +228,8 @@ describe('PullRequestService', () => {
         draft: false,
         requested_reviewers: [{ login: 'reviewer1' }],
         review_comments: 0,
-        reviews_count: 0,
+        labels: [],
+        head: { sha: 'def456' },
       },
       {
         id: 3,
@@ -223,7 +239,8 @@ describe('PullRequestService', () => {
         draft: true,
         requested_reviewers: [],
         review_comments: 3,
-        reviews_count: 1,
+        labels: [],
+        head: { sha: 'ghi789' },
       },
     ];
 
@@ -261,5 +278,180 @@ describe('PullRequestService', () => {
         },
       }
     );
+  });
+
+  it('should filter approved PRs needing QA', async () => {
+    // Mock response data
+    const mockPullRequests = [
+      {
+        id: 1,
+        number: 101,
+        title: 'Approved PR needing QA',
+        html_url: 'https://github.com/testowner/testrepo/pull/101',
+        draft: false,
+        requested_reviewers: [],
+        review_comments: 0,
+        labels: [{ name: 'needs-qa', color: 'yellow' }],
+        head: { sha: 'abc123' },
+      },
+      {
+        id: 2,
+        number: 102,
+        title: 'Approved PR not needing QA',
+        html_url: 'https://github.com/testowner/testrepo/pull/102',
+        draft: false,
+        requested_reviewers: [],
+        review_comments: 0,
+        labels: [],
+        head: { sha: 'def456' },
+      },
+    ];
+
+    // Setup mock fetch responses
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockPullRequests,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ state: 'APPROVED' }], // Reviews for PR 101
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ state: 'success' }), // CI status for PR 101
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ state: 'APPROVED' }], // Reviews for PR 102
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ state: 'success' }), // CI status for PR 102
+      });
+
+    const result = await service.getApprovedPRsNeedingQA(mockRepo, 'test-token');
+
+    // Verify only the PR with needs-qa label is returned
+    expect(result.length).toBe(1);
+    expect(result[0].number).toBe(101);
+    expect(result[0].labels).toContain('needs-qa');
+  });
+
+  it('should filter approved PRs needing CI resolution', async () => {
+    // Mock response data
+    const mockPullRequests = [
+      {
+        id: 1,
+        number: 101,
+        title: 'Approved PR with failing CI',
+        html_url: 'https://github.com/testowner/testrepo/pull/101',
+        draft: false,
+        requested_reviewers: [],
+        review_comments: 0,
+        labels: [],
+        head: { sha: 'abc123' },
+      },
+      {
+        id: 2,
+        number: 102,
+        title: 'Approved PR with passing CI',
+        html_url: 'https://github.com/testowner/testrepo/pull/102',
+        draft: false,
+        requested_reviewers: [],
+        review_comments: 0,
+        labels: [],
+        head: { sha: 'def456' },
+      },
+    ];
+
+    // Setup mock fetch responses
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockPullRequests,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ state: 'APPROVED' }], // Reviews for PR 101
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ state: 'failure' }), // CI status for PR 101
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ state: 'APPROVED' }], // Reviews for PR 102
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ state: 'success' }), // CI status for PR 102
+      });
+
+    const result = await service.getApprovedPRsNeedingCIResolution(mockRepo, 'test-token');
+
+    // Verify only the PR with failing CI is returned
+    expect(result.length).toBe(1);
+    expect(result[0].number).toBe(101);
+    expect(result[0].ciStatus).toBe('failure');
+  });
+
+  it('should filter approved PRs needing merging', async () => {
+    // Mock response data
+    const mockPullRequests = [
+      {
+        id: 1,
+        number: 101,
+        title: 'Approved PR ready for merging',
+        html_url: 'https://github.com/testowner/testrepo/pull/101',
+        draft: false,
+        requested_reviewers: [],
+        review_comments: 0,
+        labels: [],
+        head: { sha: 'abc123' },
+      },
+      {
+        id: 2,
+        number: 102,
+        title: 'Approved PR needing QA',
+        html_url: 'https://github.com/testowner/testrepo/pull/102',
+        draft: false,
+        requested_reviewers: [],
+        review_comments: 0,
+        labels: [{ name: 'needs-qa', color: 'yellow' }],
+        head: { sha: 'def456' },
+      },
+    ];
+
+    // Setup mock fetch responses
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockPullRequests,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ state: 'APPROVED' }], // Reviews for PR 101
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ state: 'success' }), // CI status for PR 101
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ state: 'APPROVED' }], // Reviews for PR 102
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ state: 'success' }), // CI status for PR 102
+      });
+
+    const result = await service.getApprovedPRsNeedingMerging(mockRepo, 'test-token');
+
+    // Verify only the PR ready for merging is returned
+    expect(result.length).toBe(1);
+    expect(result[0].number).toBe(101);
+    expect(result[0].ciStatus).toBe('success');
+    expect(result[0].labels).not.toContain('needs-qa');
   });
 });

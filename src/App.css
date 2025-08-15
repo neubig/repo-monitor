@@ -466,6 +466,61 @@ button:not(.btn):hover {
   text-decoration: underline;
 }
 
+.pr-labels,
+.pr-status {
+  margin-left: 1rem;
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.label {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.label.needs-qa {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.ci-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.ci-status.success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.ci-status.failure,
+.ci-status.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.ci-status.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.ci-status.unknown {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #9ca3af;
+}
+
 .error,
 .error-message {
   color: #ff4d4f;

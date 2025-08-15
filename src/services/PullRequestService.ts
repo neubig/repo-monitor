@@ -11,6 +11,9 @@ export interface PullRequest {
   isDraft: boolean;
   hasReviewers: boolean;
   hasBeenReviewed: boolean;
+  isApproved: boolean;
+  labels: string[];
+  ciStatus: 'pending' | 'success' | 'failure' | 'error' | 'unknown';
 }
 
 export interface Repository {
@@ -25,6 +28,23 @@ interface GitHubReviewer {
   type: string;
 }
 
+interface GitHubLabel {
+  name: string;
+  color: string;
+}
+
+interface GitHubReview {
+  state: 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED' | 'DISMISSED';
+}
+
+interface GitHubCommitStatus {
+  state: 'pending' | 'success' | 'failure' | 'error';
+  statuses: Array<{
+    state: 'pending' | 'success' | 'failure' | 'error';
+    context: string;
+  }>;
+}
+
 interface GitHubPR {
   id: number;
   number: number;
@@ -33,6 +53,10 @@ interface GitHubPR {
   draft: boolean;
   requested_reviewers: GitHubReviewer[];
   review_comments: number;
+  labels: GitHubLabel[];
+  head: {
+    sha: string;
+  };
 }
 
 export class PullRequestService {
@@ -68,19 +92,34 @@ export class PullRequestService {
       for (const pr of data as GitHubPR[]) {
         // For each PR, check if it has reviews
         let hasBeenReviewed = pr.review_comments > 0;
+        let isApproved = false;
+        let ciStatus: 'pending' | 'success' | 'failure' | 'error' | 'unknown' = 'unknown';
 
-        // If we have a token, we can fetch review data for each PR
+        // If we have a token, we can fetch additional data for each PR
         if (token) {
           try {
+            // Fetch review data
             const reviewsUrl = `${this.baseUrl}/repos/${repo.owner}/${repo.name}/pulls/${pr.number}/reviews`;
             const reviewsResponse = await fetch(reviewsUrl, { headers });
 
             if (reviewsResponse.ok) {
-              const reviewsData = await reviewsResponse.json();
+              const reviewsData = (await reviewsResponse.json()) as GitHubReview[];
               hasBeenReviewed = hasBeenReviewed || reviewsData.length > 0;
+
+              // Check if PR is approved (has at least one APPROVED review)
+              isApproved = reviewsData.some(review => review.state === 'APPROVED');
             }
-          } catch (reviewError) {
-            console.error(`Error fetching reviews for PR #${pr.number}:`, reviewError);
+
+            // Fetch CI status
+            const statusUrl = `${this.baseUrl}/repos/${repo.owner}/${repo.name}/commits/${pr.head.sha}/status`;
+            const statusResponse = await fetch(statusUrl, { headers });
+
+            if (statusResponse.ok) {
+              const statusData = (await statusResponse.json()) as GitHubCommitStatus;
+              ciStatus = statusData.state;
+            }
+          } catch (error) {
+            console.error(`Error fetching additional data for PR #${pr.number}:`, error);
           }
         }
 
@@ -92,6 +131,9 @@ export class PullRequestService {
           isDraft: pr.draft,
           hasReviewers: pr.requested_reviewers?.length > 0,
           hasBeenReviewed,
+          isApproved,
+          labels: pr.labels?.map(label => label.name) || [],
+          ciStatus,
         });
       }
 
@@ -122,6 +164,49 @@ export class PullRequestService {
   async getReviewedNonDraftPullRequests(repo: Repository, token?: string): Promise<PullRequest[]> {
     const pullRequests = await this.fetchPullRequests(repo, token);
     return pullRequests.filter(pr => !pr.isDraft && pr.hasBeenReviewed);
+  }
+
+  /**
+   * Gets approved PRs that have the "needs-qa" label
+   * @param repo Repository information
+   * @param token Optional GitHub token
+   * @returns Promise with filtered pull requests
+   */
+  async getApprovedPRsNeedingQA(repo: Repository, token?: string): Promise<PullRequest[]> {
+    const pullRequests = await this.fetchPullRequests(repo, token);
+    return pullRequests.filter(
+      pr => !pr.isDraft && pr.isApproved && pr.labels.includes('needs-qa')
+    );
+  }
+
+  /**
+   * Gets approved PRs that have failing CI actions
+   * @param repo Repository information
+   * @param token Optional GitHub token
+   * @returns Promise with filtered pull requests
+   */
+  async getApprovedPRsNeedingCIResolution(
+    repo: Repository,
+    token?: string
+  ): Promise<PullRequest[]> {
+    const pullRequests = await this.fetchPullRequests(repo, token);
+    return pullRequests.filter(
+      pr => !pr.isDraft && pr.isApproved && (pr.ciStatus === 'failure' || pr.ciStatus === 'error')
+    );
+  }
+
+  /**
+   * Gets approved PRs that are ready for merging (all CI passing, no needs-qa label)
+   * @param repo Repository information
+   * @param token Optional GitHub token
+   * @returns Promise with filtered pull requests
+   */
+  async getApprovedPRsNeedingMerging(repo: Repository, token?: string): Promise<PullRequest[]> {
+    const pullRequests = await this.fetchPullRequests(repo, token);
+    return pullRequests.filter(
+      pr =>
+        !pr.isDraft && pr.isApproved && pr.ciStatus === 'success' && !pr.labels.includes('needs-qa')
+    );
   }
 }
 
