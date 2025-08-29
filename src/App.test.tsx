@@ -29,7 +29,6 @@ describe('App', () => {
   it('renders the OpenHands Repo Monitor heading', () => {
     render(<App />);
     expect(screen.getByText('Repo Monitor')).toBeInTheDocument();
-    expect(screen.getByText('Monitor Your Repository')).toBeInTheDocument();
   });
 
   it('renders the OpenHands logo', () => {
@@ -105,13 +104,6 @@ describe('App', () => {
 
     expect(screen.queryByText('Monitoring Active')).not.toBeInTheDocument();
     expect(screen.getByText('Start Monitoring')).toBeInTheDocument();
-  });
-
-  it('renders feature cards', () => {
-    render(<App />);
-    expect(screen.getByText('Real-time Updates')).toBeInTheDocument();
-    expect(screen.getByText('AI-Powered Insights')).toBeInTheDocument();
-    expect(screen.getByText('Easy Integration')).toBeInTheDocument();
   });
 
   it('renders navigation links', () => {

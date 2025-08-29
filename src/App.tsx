@@ -112,23 +112,6 @@ function App() {
       </header>
 
       <main className="main">
-        <div className="hero-section">
-          <h2>Monitor Your Repository</h2>
-          <p>Keep track of your repository activity with OpenHands-powered monitoring</p>
-        </div>
-
-        <div className="github-auth-section">
-          <div className="auth-card">
-            <h3>GitHub Authentication</h3>
-            <GithubTokenManager onTokenChange={handleTokenChange} />
-            <p className="token-status-message">
-              {hasToken
-                ? '✅ GitHub token is set. You can now access GitHub API.'
-                : '⚠️ No GitHub token set. Some features may be limited.'}
-            </p>
-          </div>
-        </div>
-
         <div className="monitor-section">
           <div className="input-group">
             <input
@@ -179,21 +162,15 @@ function App() {
           )}
         </div>
 
-        <div className="features-section">
-          <h3>Features</h3>
-          <div className="features-grid">
-            <div className="feature-card">
-              <h4>Real-time Updates</h4>
-              <p>Get instant notifications about repository changes and activity</p>
-            </div>
-            <div className="feature-card">
-              <h4>AI-Powered Insights</h4>
-              <p>Leverage OpenHands AI to analyze code changes and patterns</p>
-            </div>
-            <div className="feature-card">
-              <h4>Easy Integration</h4>
-              <p>Simple setup with your existing GitHub workflow</p>
-            </div>
+        <div className="github-auth-section">
+          <div className="auth-card">
+            <h3>GitHub Authentication</h3>
+            <GithubTokenManager onTokenChange={handleTokenChange} />
+            <p className="token-status-message">
+              {hasToken
+                ? '✅ GitHub token is set. You can now access GitHub API.'
+                : '⚠️ No GitHub token set. Some features may be limited.'}
+            </p>
           </div>
         </div>
       </main>
