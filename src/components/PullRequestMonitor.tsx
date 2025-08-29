@@ -12,6 +12,9 @@ export function PullRequestMonitor({ repository, githubToken }: PullRequestMonit
   const [error, setError] = useState<string | null>(null);
   const [pullRequestsWithNoReviewers, setPullRequestsWithNoReviewers] = useState<PullRequest[]>([]);
   const [reviewedPullRequests, setReviewedPullRequests] = useState<PullRequest[]>([]);
+  const [approvedPRsNeedsQA, setApprovedPRsNeedsQA] = useState<PullRequest[]>([]);
+  const [approvedPRsFailingCI, setApprovedPRsFailingCI] = useState<PullRequest[]>([]);
+  const [approvedPRsReadyToMerge, setApprovedPRsReadyToMerge] = useState<PullRequest[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,13 +25,25 @@ export function PullRequestMonitor({ repository, githubToken }: PullRequestMonit
         const service = new PullRequestService();
 
         // Fetch both types of pull requests
-        const [noReviewers, reviewed] = await Promise.all([
+        const [
+          noReviewers,
+          reviewed,
+          needsQaPRs,
+          failingCIPRs,
+          readyToMergePRs
+        ] = await Promise.all([
           service.getPullRequestsWithNoReviewers(repository, githubToken),
           service.getReviewedNonDraftPullRequests(repository, githubToken),
+          service.getApprovedPRsWithLabel('needs-qa', repository, githubToken),
+          service.getApprovedPRsWithCIFailing(repository, githubToken),
+          service.getApprovedPRsReadyToMerge(repository, githubToken)
         ]);
 
         setPullRequestsWithNoReviewers(noReviewers);
         setReviewedPullRequests(reviewed);
+        setApprovedPRsNeedsQA(needsQaPRs);
+        setApprovedPRsFailingCI(failingCIPRs);
+        setApprovedPRsReadyToMerge(readyToMergePRs);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {
@@ -81,6 +96,61 @@ export function PullRequestMonitor({ repository, githubToken }: PullRequestMonit
                 <a href={pr.url} target="_blank" rel="noopener noreferrer">
                   #{pr.number}: {pr.title}
                 </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Approved PR Categories */}
+      <div className="monitor-section">
+        <h3>Needs QA</h3>
+        {approvedPRsNeedsQA.length === 0 ? (
+          <p>No pull requests needing QA</p>
+        ) : (
+          <ul className="pr-list">
+            {approvedPRsNeedsQA.map(pr => (
+              <li key={pr.id} className="pr-item">
+                <a href={pr.url} target="_blank" rel="noopener noreferrer">
+                  #{pr.number}: {pr.title}
+                </a>
+                <span className="pr-label needs-qa">needs-qa</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="monitor-section">
+        <h3>Needs CI Resolution</h3>
+        {approvedPRsFailingCI.length === 0 ? (
+          <p>No pull requests with CI failures</p>
+        ) : (
+          <ul className="pr-list">
+            {approvedPRsFailingCI.map(pr => (
+              <li key={pr.id} className="pr-item">
+                <a href={pr.url} target="_blank" rel="noopener noreferrer">
+                  #{pr.number}: {pr.title}
+                </a>
+                <span className="ci-status failing">CI: {pr.ciStatus}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="monitor-section">
+        <h3>Needs Merging</h3>
+        {approvedPRsReadyToMerge.length === 0 ? (
+          <p>No pull requests ready to merge</p>
+        ) : (
+          <ul className="pr-list">
+            {approvedPRsReadyToMerge.map(pr => (
+              <li key={pr.id} className="pr-item">
+                <a href={pr.url} target="_blank" rel="noopener noreferrer">
+                  #{pr.number}: {pr.title}
+                </a>
+                <span className="ci-status passing">CI: {pr.ciStatus}</span>
               </li>
             ))}
           </ul>

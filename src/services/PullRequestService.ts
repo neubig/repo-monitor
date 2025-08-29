@@ -36,6 +36,66 @@ interface GitHubPR {
 }
 
 export class PullRequestService {
+  async getApprovedPRsWithLabel(label: string, repository: Repository, token?: string): Promise<PullRequest[]> {
+    const prs = await this.getPullRequests(repository, token);
+    return prs.filter(pr =>
+      pr.labels.some(l => l.name === label) &&
+      pr.reviews.some(r => r.state === 'APPROVED')
+    );
+  }
+
+  async getApprovedPRsWithCIFailing(repository: Repository, token?: string): Promise<PullRequest[]> {
+    const prs = await this.getPullRequests(repository, token);
+    return prs.filter(pr =>
+      pr.reviews.some(r => r.state === 'APPROVED') &&
+      pr.ciStatus === 'failure'
+    );
+  }
+
+  async getApprovedPRsReadyToMerge(repository: Repository, token?: string): Promise<PullRequest[]> {
+    const prs = await this.getPullRequests(repository, token);
+    return prs.filter(pr =>
+      pr.reviews.some(r => r.state === 'APPROVED') &&
+      pr.ciStatus === 'success' &&
+      !pr.labels.some(l => l.name === 'needs-qa')
+    );
+  }
+  async getApprovedPRsWithLabel(label: string, repository: Repository, token?: string): Promise&lt;PullRequest[]&gt; {
+    // Implementation logic here
+  }
+
+  async getApprovedPRsWithCIFailing(repository: Repository, token?: string): Promise&lt;PullRequest[]&gt; {
+    // Implementation logic here
+  }
+
+  async getApprovedPRsReadyToMerge(repository: Repository, token?: string): Promise&lt;PullRequest[]&gt; {
+    // Implementation logic here
+  }
+  async getApprovedPRsWithLabel(label: string, repository: Repository, token?: string): Promise<PullRequest[]> {
+    const prs = await this.getPullRequests(repository, token);
+    return prs.filter(pr =>
+      pr.labels.some(l => l.name === label) &&
+      pr.reviews.some(r => r.state === 'APPROVED')
+    );
+  }
+
+  async getApprovedPRsWithCIFailing(repository: Repository, token?: string): Promise<PullRequest[]> {
+    const prs = await this.getPullRequests(repository, token);
+    return prs.filter(pr =>
+      pr.reviews.some(r => r.state === 'APPROVED') &&
+      pr.ciStatus === 'failure'
+    );
+  }
+
+  async getApprovedPRsReadyToMerge(repository: Repository, token?: string): Promise<PullRequest[]> {
+    const prs = await this.getPullRequests(repository, token);
+    return prs.filter(pr =>
+      pr.reviews.some(r => r.state === 'APPROVED') &&
+      pr.ciStatus === 'success' &&
+      !pr.labels.some(l => l.name === 'needs-qa')
+    );
+  }
+
   private baseUrl = 'https://api.github.com';
 
   /**
